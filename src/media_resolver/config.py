@@ -9,18 +9,81 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class LLMConfig(BaseModel):
-    """LLM provider configuration."""
+class LLMBackend(BaseModel):
+    """Individual LLM backend configuration."""
 
+    name: str = Field(
+        ..., description="Unique name for this backend (e.g., 'claude-sonnet', 'gpt4')"
+    )
     provider: str = Field(
-        default="anthropic",
+        ...,
         description="LLM provider: anthropic, openai, ollama, azure, cohere",
     )
-    model: str = Field(default="claude-3-5-sonnet-20241022", description="Model identifier")
+    model: str = Field(..., description="Model identifier")
     temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="Sampling temperature")
     max_tokens: int = Field(default=2000, ge=1, description="Maximum tokens to generate")
     base_url: Optional[str] = Field(None, description="Base URL for local/Ollama deployments")
     api_key: Optional[str] = Field(None, description="API key (can use env var instead)")
+
+
+class LLMConfig(BaseModel):
+    """LLM provider configuration with support for multiple backends."""
+
+    backends: list[LLMBackend] = Field(
+        default_factory=list,
+        description="List of available LLM backends",
+    )
+    active_backend: str = Field(
+        default="default",
+        description="Name of the currently active backend",
+    )
+
+    def get_active_backend(self) -> Optional[LLMBackend]:
+        """Get the currently active backend configuration."""
+        for backend in self.backends:
+            if backend.name == self.active_backend:
+                return backend
+        # Fallback to first backend if active not found
+        return self.backends[0] if self.backends else None
+
+    # Legacy single backend support (for backwards compatibility during migration)
+    provider: Optional[str] = Field(
+        None,
+        description="DEPRECATED: Use backends list instead. LLM provider: anthropic, openai, ollama, azure, cohere",
+    )
+    model: Optional[str] = Field(
+        None, description="DEPRECATED: Use backends list instead. Model identifier"
+    )
+    temperature: Optional[float] = Field(
+        None, ge=0.0, le=2.0, description="DEPRECATED: Sampling temperature"
+    )
+    max_tokens: Optional[int] = Field(
+        None, ge=1, description="DEPRECATED: Maximum tokens to generate"
+    )
+    base_url: Optional[str] = Field(
+        None, description="DEPRECATED: Base URL for local/Ollama deployments"
+    )
+    api_key: Optional[str] = Field(
+        None, description="DEPRECATED: API key (can use env var instead)"
+    )
+
+    def model_post_init(self, __context) -> None:
+        """Convert legacy single backend config to new multi-backend format."""
+        super().model_post_init(__context)
+
+        # If using legacy format, convert to new format
+        if self.provider and not self.backends:
+            legacy_backend = LLMBackend(
+                name="default",
+                provider=self.provider,
+                model=self.model or "claude-3-5-sonnet-20241022",
+                temperature=self.temperature if self.temperature is not None else 0.7,
+                max_tokens=self.max_tokens or 2000,
+                base_url=self.base_url,
+                api_key=self.api_key,
+            )
+            self.backends = [legacy_backend]
+            self.active_backend = "default"
 
 
 class MopidyConfig(BaseModel):
@@ -177,6 +240,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     if env_settings.icecast_stream_url:
         config_dict.setdefault("icecast", {})["stream_url"] = env_settings.icecast_stream_url
 
+    # Handle legacy LLM environment variables (backwards compatibility)
     if env_settings.llm_provider:
         config_dict.setdefault("llm", {})["provider"] = env_settings.llm_provider
     if env_settings.llm_model:
@@ -188,9 +252,8 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     if env_settings.ollama_base_url:
         config_dict.setdefault("llm", {})["base_url"] = env_settings.ollama_base_url
 
-    # Set API keys from environment
+    # Set API keys from environment (always set these for LangChain)
     if env_settings.anthropic_api_key:
-        config_dict.setdefault("llm", {})["api_key"] = env_settings.anthropic_api_key
         os.environ["ANTHROPIC_API_KEY"] = env_settings.anthropic_api_key
     if env_settings.openai_api_key:
         os.environ["OPENAI_API_KEY"] = env_settings.openai_api_key

@@ -36,8 +36,13 @@ class DisambiguationService:
 
         if llm is None:
             config = get_config()
-            self.llm = create_llm(config.llm)
-            self.model_info = get_model_info(config.llm)
+            active_backend = config.llm.get_active_backend()
+            if not active_backend:
+                raise ValueError(
+                    "No LLM backend configured. Please configure at least one backend in config.yaml"
+                )
+            self.llm = create_llm(active_backend)
+            self.model_info = get_model_info(active_backend)
         else:
             self.llm = llm
             self.model_info = {"provider": "custom", "model": str(type(llm).__name__)}
@@ -150,9 +155,7 @@ Be decisive - if one candidate is clearly the best match, rank it first with hig
 
         return base_prompt
 
-    def _build_user_prompt(
-        self, query: str, candidates: list[MediaCandidate], top_k: int
-    ) -> str:
+    def _build_user_prompt(self, query: str, candidates: list[MediaCandidate], top_k: int) -> str:
         """Build user prompt with query and candidates."""
         # Format candidates as JSON-like structure
         candidates_data = []
