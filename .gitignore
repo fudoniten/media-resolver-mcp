@@ -54,3 +54,8 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Nix
+result
+result-*
+.direnv/
