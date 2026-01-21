@@ -22,28 +22,39 @@ icecast:
   mount: "/mopidy"
 
 llm:
-  # LLM provider for disambiguation
-  # Options: anthropic, openai, ollama, azure, cohere
-  provider: "anthropic"
+  # List of available LLM backends for disambiguation
+  # You can configure multiple backends and switch between them from the admin UI
+  backends:
+    - name: "claude-sonnet"
+      provider: "anthropic"
+      model: "claude-3-5-sonnet-20241022"
+      temperature: 0.7
+      max_tokens: 2000
+      # api_key: "your-api-key-here"  # or use ANTHROPIC_API_KEY env var
 
-  # Model identifier
-  # Anthropic: claude-3-5-sonnet-20241022, claude-3-opus-20240229
-  # OpenAI: gpt-4-turbo-preview, gpt-3.5-turbo
-  # Ollama: llama3:70b, mistral:latest
-  model: "claude-3-5-sonnet-20241022"
+    - name: "gpt-4"
+      provider: "openai"
+      model: "gpt-4-turbo-preview"
+      temperature: 0.7
+      max_tokens: 2000
+      # api_key: "your-api-key-here"  # or use OPENAI_API_KEY env var
 
-  # Sampling temperature (0.0 - 2.0)
-  # Lower = more deterministic, Higher = more creative
-  temperature: 0.7
+    - name: "ollama-local"
+      provider: "ollama"
+      model: "llama3:70b"
+      temperature: 0.7
+      max_tokens: 2000
+      base_url: "http://localhost:11434"
 
-  # Maximum tokens to generate
-  max_tokens: 2000
+  # Name of the currently active backend
+  active_backend: "claude-sonnet"
 
-  # Base URL for local/Ollama deployments (optional)
-  # base_url: "http://localhost:11434"
-
-  # API key (optional - can use environment variable instead)
-  # api_key: "your-api-key-here"
+  # DEPRECATED: Legacy single backend configuration (for backwards compatibility)
+  # Use the 'backends' list above instead
+  # provider: "anthropic"
+  # model: "claude-3-5-sonnet-20241022"
+  # temperature: 0.7
+  # max_tokens: 2000
 
 # Podcast feed configuration
 # Add your favorite podcasts here

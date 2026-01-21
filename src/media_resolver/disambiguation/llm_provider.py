@@ -8,7 +8,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 
-from media_resolver.config import LLMConfig
+from media_resolver.config import LLMBackend
 
 logger = structlog.get_logger()
 
@@ -19,12 +19,12 @@ class LLMProviderError(Exception):
     pass
 
 
-def create_llm(config: LLMConfig) -> BaseChatModel:
+def create_llm(config: LLMBackend) -> BaseChatModel:
     """
-    Create LangChain chat model from configuration.
+    Create LangChain chat model from backend configuration.
 
     Args:
-        config: LLM configuration
+        config: LLM backend configuration
 
     Returns:
         LangChain chat model instance
@@ -133,12 +133,12 @@ def create_llm(config: LLMConfig) -> BaseChatModel:
         raise LLMProviderError(f"Failed to create {provider} LLM: {e}") from e
 
 
-def get_model_info(config: LLMConfig) -> dict[str, Any]:
+def get_model_info(config: LLMBackend) -> dict[str, Any]:
     """
     Get information about the configured model.
 
     Args:
-        config: LLM configuration
+        config: LLM backend configuration
 
     Returns:
         Dict with model information

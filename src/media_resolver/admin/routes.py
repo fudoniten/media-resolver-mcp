@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from media_resolver.config import LLMConfig, get_config, reload_config, set_config
+from media_resolver.config import LLMBackend, get_config, reload_config, set_config
 from media_resolver.disambiguation.service import DisambiguationService
 from media_resolver.models import MediaCandidate, MediaKind, RequestStatus
 from media_resolver.request_logger import get_request_logger
@@ -57,34 +57,33 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/config/update")
     async def update_config(
-        provider: str = Form(...),
-        model: str = Form(...),
-        temperature: float = Form(...),
-        max_tokens: int = Form(...),
-        base_url: Optional[str] = Form(None),
+        active_backend: str = Form(...),
     ):
-        """Update LLM configuration."""
+        """Switch active LLM backend."""
         log = logger.bind(component="admin")
 
         try:
             config = get_config()
 
-            # Update LLM config
-            config.llm.provider = provider
-            config.llm.model = model
-            config.llm.temperature = temperature
-            config.llm.max_tokens = max_tokens
-            config.llm.base_url = base_url if base_url else None
+            # Check if backend exists
+            backend_names = [b.name for b in config.llm.backends]
+            if active_backend not in backend_names:
+                raise ValueError(
+                    f"Backend '{active_backend}' not found. Available: {', '.join(backend_names)}"
+                )
+
+            # Update active backend
+            config.llm.active_backend = active_backend
 
             # Apply updated config
             set_config(config)
 
-            log.info("config_updated", provider=provider, model=model)
+            log.info("backend_switched", active_backend=active_backend)
 
             return HTMLResponse(
-                """
+                f"""
                 <div class="alert alert-success">
-                    Configuration updated successfully! Changes will take effect for new requests.
+                    Switched to backend: {active_backend}. Changes will take effect for new requests.
                 </div>
                 """
             )
@@ -134,7 +133,9 @@ def create_admin_app() -> FastAPI:
 
             # Run disambiguation
             service = DisambiguationService()
-            ranked, interaction = await service.disambiguate(query, candidates, top_k=len(candidates))
+            ranked, interaction = await service.disambiguate(
+                query, candidates, top_k=len(candidates)
+            )
 
             result = {
                 "ranked_candidates": [c.model_dump() for c in ranked],
@@ -201,13 +202,20 @@ def create_admin_app() -> FastAPI:
         request_logger = get_request_logger()
         stats = request_logger.get_statistics()
 
+        active_backend = config.llm.get_active_backend()
+        llm_info = {
+            "active_backend": config.llm.active_backend,
+            "provider": active_backend.provider if active_backend else None,
+            "model": active_backend.model if active_backend else None,
+            "available_backends": [b.name for b in config.llm.backends],
+        }
+
         return {
             "status": "running",
             "config": {
                 "mopidy_url": config.mopidy.rpc_url,
                 "icecast_url": config.icecast.stream_url,
-                "llm_provider": config.llm.provider,
-                "llm_model": config.llm.model,
+                "llm": llm_info,
             },
             "statistics": stats,
         }

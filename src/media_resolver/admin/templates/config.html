@@ -4,52 +4,112 @@
 
 {% block content %}
 <div class="card">
-    <h2>LLM Configuration</h2>
+    <h2>LLM Backend Selection</h2>
     <div id="config-result"></div>
+    
+    {% if config.llm.backends %}
     <form hx-post="/admin/config/update" hx-target="#config-result" hx-swap="innerHTML">
         <div class="form-group">
-            <label for="provider">Provider</label>
-            <select name="provider" id="provider">
-                <option value="anthropic" {% if config.llm.provider == "anthropic" %}selected{% endif %}>Anthropic (Claude)</option>
-                <option value="openai" {% if config.llm.provider == "openai" %}selected{% endif %}>OpenAI (GPT)</option>
-                <option value="ollama" {% if config.llm.provider == "ollama" %}selected{% endif %}>Ollama (Local)</option>
-                <option value="azure" {% if config.llm.provider == "azure" %}selected{% endif %}>Azure OpenAI</option>
-                <option value="cohere" {% if config.llm.provider == "cohere" %}selected{% endif %}>Cohere</option>
+            <label for="active_backend">Active Backend</label>
+            <select name="active_backend" id="active_backend">
+                {% for backend in config.llm.backends %}
+                <option value="{{ backend.name }}" {% if config.llm.active_backend == backend.name %}selected{% endif %}>
+                    {{ backend.name }} ({{ backend.provider }} - {{ backend.model }})
+                </option>
+                {% endfor %}
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="model">Model</label>
-            <input type="text" name="model" id="model" value="{{ config.llm.model }}" placeholder="e.g., claude-3-5-sonnet-20241022">
-        </div>
-
-        <div class="form-group">
-            <label for="temperature">Temperature (0.0 - 2.0)</label>
-            <input type="number" name="temperature" id="temperature" value="{{ config.llm.temperature }}" step="0.1" min="0" max="2">
-        </div>
-
-        <div class="form-group">
-            <label for="max_tokens">Max Tokens</label>
-            <input type="number" name="max_tokens" id="max_tokens" value="{{ config.llm.max_tokens }}" min="100" max="10000">
-        </div>
-
-        <div class="form-group">
-            <label for="base_url">Base URL (for Ollama/local models)</label>
-            <input type="text" name="base_url" id="base_url" value="{{ config.llm.base_url or '' }}" placeholder="http://localhost:11434">
-        </div>
-
         <button type="submit">
-            Update Configuration
+            Switch Backend
             <span class="htmx-indicator">⏳</span>
         </button>
     </form>
+    
+    <hr>
+    
+    <h3>Available Backends</h3>
+    <div class="backend-list">
+        {% for backend in config.llm.backends %}
+        <div class="backend-item {% if config.llm.active_backend == backend.name %}active{% endif %}">
+            <h4>{{ backend.name }} {% if config.llm.active_backend == backend.name %}(Active){% endif %}</h4>
+            <ul>
+                <li><strong>Provider:</strong> {{ backend.provider }}</li>
+                <li><strong>Model:</strong> {{ backend.model }}</li>
+                <li><strong>Temperature:</strong> {{ backend.temperature }}</li>
+                <li><strong>Max Tokens:</strong> {{ backend.max_tokens }}</li>
+                {% if backend.base_url %}
+                <li><strong>Base URL:</strong> {{ backend.base_url }}</li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="alert alert-warning">
+        No LLM backends configured. Please add backends to your config.yaml file.
+    </p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Configuration Help</h2>
+    <p>To add or modify backends, edit your <code>config/config.yaml</code> file:</p>
+    <pre><code>llm:
+  backends:
+    - name: "claude-sonnet"
+      provider: "anthropic"
+      model: "claude-3-5-sonnet-20241022"
+      temperature: 0.7
+      max_tokens: 2000
+    
+    - name: "gpt-4"
+      provider: "openai"
+      model: "gpt-4-turbo-preview"
+      temperature: 0.7
+      max_tokens: 2000
+  
+  active_backend: "claude-sonnet"</code></pre>
+    <p class="alert alert-info">
+        API keys are set via environment variables (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.) and not displayed here for security.
+    </p>
 </div>
 
 <div class="card">
     <h2>Current Configuration (Read-Only)</h2>
-    <p class="alert alert-info">
-        API keys are set via environment variables and not displayed here for security.
-    </p>
-    <pre><code>{{ config.model_dump_json(indent=2, exclude={"llm": {"api_key"}}) }}</code></pre>
+    <pre><code>{{ config.model_dump_json(indent=2, exclude={"llm": {"backends": {"__all__": {"api_key"}}}}) }}</code></pre>
 </div>
+
+<style>
+.backend-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.backend-item {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.backend-item.active {
+    border-color: #4CAF50;
+    background: #e8f5e9;
+}
+
+.backend-item h4 {
+    margin-top: 0;
+}
+
+.backend-item ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.backend-item li {
+    margin: 0.25rem 0;
+}
+</style>
 {% endblock %}
