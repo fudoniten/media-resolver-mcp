@@ -30,12 +30,62 @@ User → Home Assistant Assist → MCP Tools → Media Resolver
 
 ### Prerequisites
 
-- Python 3.12+
+- [Nix](https://nixos.org/download.html) with flakes enabled (recommended)
+  - OR Python 3.12+ for manual installation
 - Mopidy server with HTTP API enabled
 - Icecast streaming server (optional but recommended)
 - LLM API key (Anthropic, OpenAI, or local Ollama)
 
-### Installation
+> **Note:** If you have Nix installed but flakes are not enabled, add the following to `~/.config/nix/nix.conf`:
+> ```
+> experimental-features = nix-command flakes
+> ```
+
+### Installation with Nix (Recommended)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/media-selector-mcp.git
+cd media-selector-mcp
+```
+
+2. Configure the server:
+```bash
+cp config/config.yaml.example config/config.yaml
+# Edit config/config.yaml with your settings
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+4. Run the server:
+```bash
+nix run
+```
+
+The server will start on `http://localhost:8000` with:
+- MCP endpoint: `/mcp`
+- Admin UI: `/admin`
+
+#### Additional Nix Commands
+
+```bash
+# Build the package
+nix build
+
+# Enter development shell with all dependencies
+nix develop
+
+# Run the built package directly
+./result/bin/media-resolver
+```
+
+### Installation with pip
+
+If you don't have Nix installed, you can use pip:
 
 1. Clone the repository:
 ```bash
@@ -63,6 +113,8 @@ cp .env.example .env
 5. Run the server:
 ```bash
 python -m media_resolver.server
+# Or use the installed command
+media-resolver
 ```
 
 The server will start on `http://localhost:8000` with:
