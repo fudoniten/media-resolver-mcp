@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Media Resolver Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>System Status</h2>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="value">{{ stats.total_requests }}</div>
+            <div class="label">Total Requests</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ stats.disambiguations }}</div>
+            <div class="label">LLM Disambiguations</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ stats.avg_latency_ms }}ms</div>
+            <div class="label">Avg Latency</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ config.llm.provider }}</div>
+            <div class="label">LLM Provider</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Configuration Summary</h2>
+    <table>
+        <tr>
+            <th>Setting</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Mopidy RPC URL</td>
+            <td><code>{{ config.mopidy.rpc_url }}</code></td>
+        </tr>
+        <tr>
+            <td>Icecast Stream URL</td>
+            <td><code>{{ config.icecast.stream_url }}</code></td>
+        </tr>
+        <tr>
+            <td>LLM Provider</td>
+            <td><strong>{{ config.llm.provider }}</strong></td>
+        </tr>
+        <tr>
+            <td>LLM Model</td>
+            <td><code>{{ config.llm.model }}</code></td>
+        </tr>
+        <tr>
+            <td>Temperature</td>
+            <td>{{ config.llm.temperature }}</td>
+        </tr>
+        <tr>
+            <td>Max Tokens</td>
+            <td>{{ config.llm.max_tokens }}</td>
+        </tr>
+        <tr>
+            <td>Podcast Feeds</td>
+            <td>{{ config.podcast_feeds|length }} configured</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Request Statistics by Tool</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tool Name</th>
+                <th>Request Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tool, count in stats.by_tool.items() %}
+            <tr>
+                <td><code>{{ tool }}</code></td>
+                <td>{{ count }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2" style="text-align: center; color: #999;">No requests yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Quick Actions</h2>
+    <a href="/admin/test" class="btn">Test Disambiguation</a>
+    <a href="/admin/requests" class="btn btn-secondary">View Request History</a>
+</div>
+{% endblock %}

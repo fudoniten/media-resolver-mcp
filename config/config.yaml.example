@@ -1,0 +1,87 @@
+# Media Resolver MCP Server Configuration
+# Copy this file to config.yaml and customize for your environment
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  log_level: "INFO"
+
+mopidy:
+  # Mopidy JSON-RPC endpoint
+  # In Kubernetes: http://mopidy-service:6680/mopidy/rpc
+  # Local: http://localhost:6680/mopidy/rpc
+  rpc_url: "http://mopidy:6680/mopidy/rpc"
+  timeout: 10
+
+icecast:
+  # Icecast stream URL that playback devices can access
+  # This must be reachable from your Home Assistant devices
+  # In Kubernetes: http://icecast-service:8000/mopidy
+  # On LAN: http://192.168.1.100:8000/mopidy
+  stream_url: "http://icecast:8000/mopidy"
+  mount: "/mopidy"
+
+llm:
+  # LLM provider for disambiguation
+  # Options: anthropic, openai, ollama, azure, cohere
+  provider: "anthropic"
+
+  # Model identifier
+  # Anthropic: claude-3-5-sonnet-20241022, claude-3-opus-20240229
+  # OpenAI: gpt-4-turbo-preview, gpt-3.5-turbo
+  # Ollama: llama3:70b, mistral:latest
+  model: "claude-3-5-sonnet-20241022"
+
+  # Sampling temperature (0.0 - 2.0)
+  # Lower = more deterministic, Higher = more creative
+  temperature: 0.7
+
+  # Maximum tokens to generate
+  max_tokens: 2000
+
+  # Base URL for local/Ollama deployments (optional)
+  # base_url: "http://localhost:11434"
+
+  # API key (optional - can use environment variable instead)
+  # api_key: "your-api-key-here"
+
+# Podcast feed configuration
+# Add your favorite podcasts here
+podcast_feeds:
+  - name: "Radiolab"
+    rss_url: "https://feeds.npr.org/510298/podcast.xml"
+    tags: ["science", "storytelling"]
+
+  - name: "The Daily"
+    rss_url: "https://feeds.simplecast.com/54nAGcIl"
+    tags: ["news"]
+
+  - name: "99% Invisible"
+    rss_url: "https://feeds.99percentinvisible.org/99percentinvisible"
+    tags: ["design", "architecture"]
+
+  - name: "Hardcore History"
+    rss_url: "https://feeds.feedburner.com/dancarlin/history"
+    tags: ["history"]
+
+  - name: "Reply All"
+    rss_url: "https://feeds.megaphone.fm/replyall"
+    tags: ["technology", "comedy"]
+
+# Genre mappings for music
+# Used when Mopidy backend doesn't support genre search
+genre_mappings:
+  - genre: "jazz"
+    playlists: ["Jazz Classics", "Smooth Jazz"]
+
+  - genre: "rock"
+    playlists: ["Classic Rock", "Alternative Rock"]
+
+  - genre: "classical"
+    playlists: ["Classical Essentials"]
+
+  - genre: "electronic"
+    playlists: ["Electronic Favorites", "House Music"]
+
+# Request history settings
+max_request_history: 500

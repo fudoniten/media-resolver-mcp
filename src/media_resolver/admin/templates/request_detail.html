@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Request Detail - Media Resolver Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Request Details</h2>
+    <table>
+        <tr>
+            <th style="width: 200px;">Request ID</th>
+            <td><code>{{ req_log.request_id }}</code></td>
+        </tr>
+        <tr>
+            <th>Timestamp</th>
+            <td>{{ req_log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+        <tr>
+            <th>Tool Name</th>
+            <td><code>{{ req_log.tool_name }}</code></td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>
+                {% if req_log.status.value == "success" %}
+                    <span class="badge badge-success">Success</span>
+                {% elif req_log.status.value == "error" %}
+                    <span class="badge badge-error">Error</span>
+                {% else %}
+                    <span class="badge badge-warning">{{ req_log.status.value }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Total Latency</th>
+            <td>{{ req_log.total_latency_ms }}ms</td>
+        </tr>
+        <tr>
+            <th>Mopidy Results</th>
+            <td>{{ req_log.mopidy_search_results or '—' }}</td>
+        </tr>
+        <tr>
+            <th>Disambiguation</th>
+            <td>{% if req_log.disambiguation_occurred %}Yes{% else %}No{% endif %}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Input Parameters</h2>
+    <pre><code>{{ req_log.input_params|tojson(indent=2) }}</code></pre>
+</div>
+
+{% if req_log.llm_interaction %}
+<div class="card">
+    <h2>LLM Interaction</h2>
+    <table>
+        <tr>
+            <th style="width: 200px;">Provider</th>
+            <td>{{ req_log.llm_interaction.provider }}</td>
+        </tr>
+        <tr>
+            <th>Model</th>
+            <td><code>{{ req_log.llm_interaction.model }}</code></td>
+        </tr>
+        <tr>
+            <th>Latency</th>
+            <td>{{ req_log.llm_interaction.latency_ms }}ms</td>
+        </tr>
+        <tr>
+            <th>Tokens</th>
+            <td>
+                Prompt: {{ req_log.llm_interaction.tokens.get('prompt', 0) }},
+                Completion: {{ req_log.llm_interaction.tokens.get('completion', 0) }}
+            </td>
+        </tr>
+    </table>
+
+    <h3 style="margin-top: 20px; margin-bottom: 10px;">Prompt</h3>
+    <pre><code>{{ req_log.llm_interaction.prompt }}</code></pre>
+
+    <h3 style="margin-top: 20px; margin-bottom: 10px;">Reasoning</h3>
+    <pre><code>{{ req_log.llm_interaction.reasoning }}</code></pre>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Output</h2>
+    <pre><code>{{ req_log.output|tojson(indent=2) }}</code></pre>
+</div>
+
+{% if req_log.error_message %}
+<div class="card">
+    <h2>Error Message</h2>
+    <div class="alert alert-error">{{ req_log.error_message }}</div>
+</div>
+{% endif %}
+
+<a href="/admin/requests" class="btn btn-secondary">← Back to Request History</a>
+{% endblock %}

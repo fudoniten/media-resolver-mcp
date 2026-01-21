@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration - Media Resolver Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>LLM Configuration</h2>
+    <div id="config-result"></div>
+    <form hx-post="/admin/config/update" hx-target="#config-result" hx-swap="innerHTML">
+        <div class="form-group">
+            <label for="provider">Provider</label>
+            <select name="provider" id="provider">
+                <option value="anthropic" {% if config.llm.provider == "anthropic" %}selected{% endif %}>Anthropic (Claude)</option>
+                <option value="openai" {% if config.llm.provider == "openai" %}selected{% endif %}>OpenAI (GPT)</option>
+                <option value="ollama" {% if config.llm.provider == "ollama" %}selected{% endif %}>Ollama (Local)</option>
+                <option value="azure" {% if config.llm.provider == "azure" %}selected{% endif %}>Azure OpenAI</option>
+                <option value="cohere" {% if config.llm.provider == "cohere" %}selected{% endif %}>Cohere</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="model">Model</label>
+            <input type="text" name="model" id="model" value="{{ config.llm.model }}" placeholder="e.g., claude-3-5-sonnet-20241022">
+        </div>
+
+        <div class="form-group">
+            <label for="temperature">Temperature (0.0 - 2.0)</label>
+            <input type="number" name="temperature" id="temperature" value="{{ config.llm.temperature }}" step="0.1" min="0" max="2">
+        </div>
+
+        <div class="form-group">
+            <label for="max_tokens">Max Tokens</label>
+            <input type="number" name="max_tokens" id="max_tokens" value="{{ config.llm.max_tokens }}" min="100" max="10000">
+        </div>
+
+        <div class="form-group">
+            <label for="base_url">Base URL (for Ollama/local models)</label>
+            <input type="text" name="base_url" id="base_url" value="{{ config.llm.base_url or '' }}" placeholder="http://localhost:11434">
+        </div>
+
+        <button type="submit">
+            Update Configuration
+            <span class="htmx-indicator">⏳</span>
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Current Configuration (Read-Only)</h2>
+    <p class="alert alert-info">
+        API keys are set via environment variables and not displayed here for security.
+    </p>
+    <pre><code>{{ config.model_dump_json(indent=2, exclude={"llm": {"api_key"}}) }}</code></pre>
+</div>
+{% endblock %}

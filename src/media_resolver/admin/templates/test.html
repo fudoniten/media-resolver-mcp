@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Testing - Media Resolver Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Test Disambiguation</h2>
+    <div id="test-result"></div>
+    <form hx-post="/admin/test/disambiguation" hx-target="#test-result" hx-swap="innerHTML" x-data="{ candidates: [] }">
+        <div class="form-group">
+            <label for="query">User Query</label>
+            <input type="text" name="query" id="query" placeholder="e.g., 'play beatles'" required>
+        </div>
+
+        <div class="form-group">
+            <label for="candidates_json">Test Candidates (JSON)</label>
+            <textarea name="candidates_json" id="candidates_json" rows="10" placeholder='[
+  {"title": "The Beatles", "subtitle": "Artist", "kind": "artist", "id": "1"},
+  {"title": "Beatles Tribute Band", "subtitle": "Artist", "kind": "artist", "id": "2"}
+]' required></textarea>
+            <small style="color: #666;">Enter a JSON array of candidate objects with at least: title, kind, id</small>
+        </div>
+
+        <button type="submit">
+            Run Test
+            <span class="htmx-indicator">⏳</span>
+        </button>
+    </form>
+</div>
+
+<script>
+    // Listen for htmx responses to format JSON nicely
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'test-result') {
+            try {
+                const content = evt.detail.target.textContent;
+                const json = JSON.parse(content);
+                evt.detail.target.innerHTML = '<pre><code>' + JSON.stringify(json, null, 2) + '</code></pre>';
+            } catch (e) {
+                // Not JSON or already formatted, leave as is
+            }
+        }
+    });
+</script>
+{% endblock %}

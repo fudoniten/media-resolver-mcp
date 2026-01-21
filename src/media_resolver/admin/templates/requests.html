@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Request History - Media Resolver Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Request History</h2>
+    <p style="margin-bottom: 16px; color: #666;">Recent MCP tool invocations with LLM interactions and results</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Tool</th>
+                <th>Status</th>
+                <th>Latency</th>
+                <th>LLM Used</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ req.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td><code>{{ req.tool_name }}</code></td>
+                <td>
+                    {% if req.status.value == "success" %}
+                        <span class="badge badge-success">Success</span>
+                    {% elif req.status.value == "error" %}
+                        <span class="badge badge-error">Error</span>
+                    {% else %}
+                        <span class="badge badge-warning">{{ req.status.value }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ req.total_latency_ms }}ms</td>
+                <td>
+                    {% if req.llm_interaction %}
+                        {{ req.llm_interaction.provider }} / {{ req.llm_interaction.model }}
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/admin/requests/{{ req.request_id }}" style="color: #3498db; text-decoration: none;">View Details</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #999; padding: 40px;">
+                    No requests yet. Try making some MCP tool calls!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
