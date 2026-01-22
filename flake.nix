@@ -13,6 +13,58 @@
         python = pkgs.python312;
         pythonPackages = python.pkgs;
 
+        # Custom package for langchain-openai
+        langchain-openai = pythonPackages.buildPythonPackage rec {
+          pname = "langchain-openai";
+          version = "1.1.7";
+          pyproject = true;
+
+          src = pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-NelZxoaaxqp6oKByRyR6dCKyL39+aJuD9RoC/DyCjgs=";
+          };
+
+          build-system = with pythonPackages; [
+            poetry-core
+          ];
+
+          dependencies = with pythonPackages; [
+            langchain-core
+            openai
+            tiktoken
+          ];
+
+          pythonImportsCheck = [ "langchain_openai" ];
+
+          doCheck = false; # Skip tests to avoid additional dependencies
+        };
+
+        # Custom package for langchain-anthropic
+        langchain-anthropic = pythonPackages.buildPythonPackage rec {
+          pname = "langchain-anthropic";
+          version = "1.3.1";
+          pyproject = true;
+
+          src = pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-H8Kc+ANwN1l+7hcpLMf0TYN86vEuEZV2jMmWJ7ODcEc=";
+          };
+
+          build-system = with pythonPackages; [
+            poetry-core
+          ];
+
+          dependencies = with pythonPackages; [
+            anthropic
+            langchain-core
+            pydantic
+          ];
+
+          pythonImportsCheck = [ "langchain_anthropic" ];
+
+          doCheck = false; # Skip tests to avoid additional dependencies
+        };
+
         media-resolver-mcp = pythonPackages.buildPythonApplication {
           pname = "media-resolver-mcp";
           version = "0.1.0";
@@ -25,38 +77,38 @@
             wheel
           ];
 
-          propagatedBuildInputs = with pythonPackages; [
+          propagatedBuildInputs = [
             # MCP Server Framework
-            fastmcp
+            pythonPackages.fastmcp
 
             # Web Framework for Admin UI
-            fastapi
-            uvicorn
-            jinja2
+            pythonPackages.fastapi
+            pythonPackages.uvicorn
+            pythonPackages.jinja2
 
             # LangChain for LLM integration
-            langchain
-            langchain-core
-            langchain-community
-            # Note: langchain-anthropic and langchain-openai may need to be added
-            # if they become available in nixpkgs
+            pythonPackages.langchain
+            pythonPackages.langchain-core
+            pythonPackages.langchain-community
+            langchain-anthropic  # Custom package
+            langchain-openai     # Custom package
 
             # HTTP clients
-            httpx
-            aiohttp
+            pythonPackages.httpx
+            pythonPackages.aiohttp
 
             # Configuration and data handling
-            pydantic
-            pydantic-settings
-            pyyaml
+            pythonPackages.pydantic
+            pythonPackages.pydantic-settings
+            pythonPackages.pyyaml
 
             # RSS parsing for podcasts
-            feedparser
-            python-dateutil
+            pythonPackages.feedparser
+            pythonPackages.python-dateutil
 
             # Utilities
-            python-dotenv
-            structlog
+            pythonPackages.python-dotenv
+            pythonPackages.structlog
           ];
 
           # Optional dependencies for development
