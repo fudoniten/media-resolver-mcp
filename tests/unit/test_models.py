@@ -1,6 +1,5 @@
 """Unit tests for data models."""
 
-
 import pytest
 
 from media_resolver.models import (

@@ -57,15 +57,11 @@ class LLMConfig(BaseModel):
     temperature: float | None = Field(
         None, ge=0.0, le=2.0, description="DEPRECATED: Sampling temperature"
     )
-    max_tokens: int | None = Field(
-        None, ge=1, description="DEPRECATED: Maximum tokens to generate"
-    )
+    max_tokens: int | None = Field(None, ge=1, description="DEPRECATED: Maximum tokens to generate")
     base_url: str | None = Field(
         None, description="DEPRECATED: Base URL for local/Ollama deployments"
     )
-    api_key: str | None = Field(
-        None, description="DEPRECATED: API key (can use env var instead)"
-    )
+    api_key: str | None = Field(None, description="DEPRECATED: API key (can use env var instead)")
 
     def model_post_init(self, __context) -> None:
         """Convert legacy single backend config to new multi-backend format."""

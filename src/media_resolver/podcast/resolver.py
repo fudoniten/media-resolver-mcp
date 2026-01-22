@@ -1,6 +1,5 @@
 """High-level podcast resolution logic."""
 
-
 import structlog
 
 from media_resolver.config import Config, PodcastFeed
