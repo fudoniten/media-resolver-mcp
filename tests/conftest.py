@@ -1,10 +1,10 @@
 """Shared test fixtures and configuration."""
 
-import pytest
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
-from media_resolver.config import Config, LLMConfig, LLMBackend, MopidyConfig, IcecastConfig
+import pytest
+
+from media_resolver.config import Config, IcecastConfig, LLMBackend, LLMConfig, MopidyConfig
 
 
 @pytest.fixture

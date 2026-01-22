@@ -1,10 +1,11 @@
 """Unit tests for RSS feed parser."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+from media_resolver.models import MediaKind
 from media_resolver.podcast.rss_parser import PodcastRSSParser, RSSParserError
-from media_resolver.models import MediaKind, MediaCandidate
 
 
 @pytest.mark.asyncio

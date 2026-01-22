@@ -2,7 +2,6 @@
 
 import random
 from datetime import datetime
-from typing import Optional
 
 import feedparser
 import httpx
@@ -75,8 +74,8 @@ class PodcastRSSParser:
         return feed
 
     def entry_to_candidate(
-        self, entry: dict, show_name: Optional[str] = None
-    ) -> Optional[MediaCandidate]:
+        self, entry: dict, show_name: str | None = None
+    ) -> MediaCandidate | None:
         """
         Convert RSS feed entry to MediaCandidate.
 
@@ -112,16 +111,16 @@ class PodcastRSSParser:
 
         # Parse published date
         published = None
-        if "published_parsed" in entry and entry.published_parsed:
+        if "published_parsed" in entry and entry.get("published_parsed"):
             try:
-                dt = datetime(*entry.published_parsed[:6])
+                dt = datetime(*entry["published_parsed"][:6])
                 published = dt.isoformat()
             except (TypeError, ValueError):
                 pass
 
         if not published and "published" in entry:
             try:
-                dt = date_parser.parse(entry.published)
+                dt = date_parser.parse(entry["published"])
                 published = dt.isoformat()
             except Exception:
                 pass
@@ -151,8 +150,8 @@ class PodcastRSSParser:
         )
 
     async def get_latest_episode(
-        self, rss_url: str, show_name: Optional[str] = None
-    ) -> Optional[MediaCandidate]:
+        self, rss_url: str, show_name: str | None = None
+    ) -> MediaCandidate | None:
         """
         Get the latest episode from a podcast feed.
 
@@ -182,8 +181,8 @@ class PodcastRSSParser:
         return self.entry_to_candidate(latest_entry, show_name or feed.feed.get("title"))
 
     async def get_random_episode(
-        self, rss_url: str, show_name: Optional[str] = None, recent_count: int = 50
-    ) -> Optional[MediaCandidate]:
+        self, rss_url: str, show_name: str | None = None, recent_count: int = 50
+    ) -> MediaCandidate | None:
         """
         Get a random episode from recent episodes.
 
@@ -207,7 +206,7 @@ class PodcastRSSParser:
         return self.entry_to_candidate(random_entry, show_name or feed.feed.get("title"))
 
     async def search_episodes(
-        self, rss_url: str, query: str, show_name: Optional[str] = None, limit: int = 5
+        self, rss_url: str, query: str, show_name: str | None = None, limit: int = 5
     ) -> list[MediaCandidate]:
         """
         Search episodes by title and description.
@@ -273,7 +272,7 @@ class PodcastRSSParser:
         # Return top N
         return [candidate for candidate, _ in matches[:limit]]
 
-    async def get_show_info(self, rss_url: str) -> Optional[MediaCandidate]:
+    async def get_show_info(self, rss_url: str) -> MediaCandidate | None:
         """
         Get podcast show information.
 

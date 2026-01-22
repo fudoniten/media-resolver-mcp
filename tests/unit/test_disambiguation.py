@@ -1,11 +1,12 @@
 """Unit tests for disambiguation service."""
 
 import json
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from media_resolver.disambiguation.service import DisambiguationService
-from media_resolver.models import MediaCandidate, MediaKind, LLMInteraction
+from media_resolver.models import MediaCandidate, MediaKind
 
 
 @pytest.mark.asyncio

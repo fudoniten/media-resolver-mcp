@@ -1,15 +1,13 @@
 """FastAPI admin UI routes."""
 
 from pathlib import Path
-from typing import Optional
 
 import structlog
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from media_resolver.config import LLMBackend, get_config, reload_config, set_config
+from media_resolver.config import get_config, set_config
 from media_resolver.disambiguation.service import DisambiguationService
 from media_resolver.models import MediaCandidate, MediaKind, RequestStatus
 from media_resolver.request_logger import get_request_logger
@@ -80,13 +78,11 @@ def create_admin_app() -> FastAPI:
 
             log.info("backend_switched", active_backend=active_backend)
 
-            return HTMLResponse(
-                f"""
+            return HTMLResponse(f"""
                 <div class="alert alert-success">
                     Switched to backend: {active_backend}. Changes will take effect for new requests.
                 </div>
-                """
-            )
+                """)
 
         except Exception as e:
             log.error("config_update_failed", error=str(e))
@@ -150,7 +146,7 @@ def create_admin_app() -> FastAPI:
 
     @app.get("/requests", response_class=HTMLResponse)
     async def requests_panel(
-        request: Request, tool: Optional[str] = None, status: Optional[str] = None, limit: int = 50
+        request: Request, tool: str | None = None, status: str | None = None, limit: int = 50
     ):
         """Request history panel."""
         request_logger = get_request_logger()

@@ -1,20 +1,19 @@
 """Unit tests for data models."""
 
-from datetime import datetime
 
 import pytest
 
 from media_resolver.models import (
-    MediaKind,
-    PlaybackMode,
-    MediaCandidate,
-    NowPlaying,
-    PlayPlan,
     ErrorResponse,
-    StreamInfo,
-    RequestStatus,
     LLMInteraction,
+    MediaCandidate,
+    MediaKind,
+    NowPlaying,
+    PlaybackMode,
+    PlayPlan,
     RequestLog,
+    RequestStatus,
+    StreamInfo,
 )
 
 

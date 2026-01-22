@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -31,13 +31,13 @@ class MediaCandidate(BaseModel):
     id: str = Field(..., description="Stable identifier (Mopidy URI or URL)")
     kind: MediaKind = Field(..., description="Type of media")
     title: str = Field(..., description="Display title")
-    subtitle: Optional[str] = Field(None, description="Artist name, show name, or additional info")
-    published: Optional[str] = Field(None, description="Publication date (ISO 8601) for podcasts")
-    duration_sec: Optional[int] = Field(None, description="Duration in seconds")
-    audio_url: Optional[str] = Field(None, description="Direct playable URL if available")
-    mopidy_uri: Optional[str] = Field(None, description="Mopidy URI if applicable")
+    subtitle: str | None = Field(None, description="Artist name, show name, or additional info")
+    published: str | None = Field(None, description="Publication date (ISO 8601) for podcasts")
+    duration_sec: int | None = Field(None, description="Duration in seconds")
+    audio_url: str | None = Field(None, description="Direct playable URL if available")
+    mopidy_uri: str | None = Field(None, description="Mopidy URI if applicable")
     score: float = Field(default=0.0, ge=0.0, le=1.0, description="Relevance score (0-1)")
-    snippet: Optional[str] = Field(None, description="Short description for disambiguation")
+    snippet: str | None = Field(None, description="Short description for disambiguation")
 
     class Config:
         json_schema_extra = {
@@ -58,11 +58,11 @@ class NowPlaying(BaseModel):
     """Information about currently playing media."""
 
     title: str = Field(..., description="Track or episode title")
-    artist_or_show: Optional[str] = Field(None, description="Artist name or podcast show")
+    artist_or_show: str | None = Field(None, description="Artist name or podcast show")
     kind: MediaKind = Field(..., description="Type of media")
-    duration_sec: Optional[int] = Field(None, description="Duration in seconds")
-    position_sec: Optional[int] = Field(None, description="Current playback position")
-    mopidy_uri: Optional[str] = Field(None, description="Mopidy URI")
+    duration_sec: int | None = Field(None, description="Duration in seconds")
+    position_sec: int | None = Field(None, description="Current playback position")
+    mopidy_uri: str | None = Field(None, description="Mopidy URI")
 
 
 class PlayPlan(BaseModel):
@@ -73,13 +73,11 @@ class PlayPlan(BaseModel):
     alternates: list[MediaCandidate] = Field(
         default_factory=list, description="Alternative candidates if ambiguous"
     )
-    requires_clarification: bool = Field(
-        default=False, description="Whether user input is needed"
-    )
-    clarification_question: Optional[str] = Field(
+    requires_clarification: bool = Field(default=False, description="Whether user input is needed")
+    clarification_question: str | None = Field(
         None, description="Question to ask user for disambiguation"
     )
-    total_tracks: Optional[int] = Field(None, description="Total number of tracks queued")
+    total_tracks: int | None = Field(None, description="Total number of tracks queued")
 
     class Config:
         json_schema_extra = {
@@ -103,7 +101,7 @@ class ErrorResponse(BaseModel):
     error_code: str = Field(..., description="Machine-readable error code")
     message: str = Field(..., description="Human-readable error message")
     retryable: bool = Field(default=False, description="Whether the operation can be retried")
-    details: Optional[dict[str, Any]] = Field(None, description="Additional error context")
+    details: dict[str, Any] | None = Field(None, description="Additional error context")
 
 
 class StreamInfo(BaseModel):
@@ -147,18 +145,18 @@ class RequestLog(BaseModel):
     input_params: dict[str, Any] = Field(..., description="Input parameters to the tool")
 
     # LLM interaction (optional, only if disambiguation occurred)
-    llm_interaction: Optional[LLMInteraction] = Field(
+    llm_interaction: LLMInteraction | None = Field(
         None, description="LLM interaction details if disambiguation occurred"
     )
 
     # Result
     output: dict[str, Any] = Field(..., description="Tool output (PlayPlan, MediaCandidate, etc.)")
     status: RequestStatus = Field(..., description="Request status")
-    error_message: Optional[str] = Field(None, description="Error message if status is error")
+    error_message: str | None = Field(None, description="Error message if status is error")
     total_latency_ms: int = Field(..., description="Total request latency in milliseconds")
 
     # Context
-    mopidy_search_results: Optional[int] = Field(
+    mopidy_search_results: int | None = Field(
         None, description="Number of candidates from Mopidy search"
     )
     disambiguation_occurred: bool = Field(

@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -22,8 +22,8 @@ class LLMBackend(BaseModel):
     model: str = Field(..., description="Model identifier")
     temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="Sampling temperature")
     max_tokens: int = Field(default=2000, ge=1, description="Maximum tokens to generate")
-    base_url: Optional[str] = Field(None, description="Base URL for local/Ollama deployments")
-    api_key: Optional[str] = Field(None, description="API key (can use env var instead)")
+    base_url: str | None = Field(None, description="Base URL for local/Ollama deployments")
+    api_key: str | None = Field(None, description="API key (can use env var instead)")
 
 
 class LLMConfig(BaseModel):
@@ -38,7 +38,7 @@ class LLMConfig(BaseModel):
         description="Name of the currently active backend",
     )
 
-    def get_active_backend(self) -> Optional[LLMBackend]:
+    def get_active_backend(self) -> LLMBackend | None:
         """Get the currently active backend configuration."""
         for backend in self.backends:
             if backend.name == self.active_backend:
@@ -47,23 +47,23 @@ class LLMConfig(BaseModel):
         return self.backends[0] if self.backends else None
 
     # Legacy single backend support (for backwards compatibility during migration)
-    provider: Optional[str] = Field(
+    provider: str | None = Field(
         None,
         description="DEPRECATED: Use backends list instead. LLM provider: anthropic, openai, ollama, azure, cohere",
     )
-    model: Optional[str] = Field(
+    model: str | None = Field(
         None, description="DEPRECATED: Use backends list instead. Model identifier"
     )
-    temperature: Optional[float] = Field(
+    temperature: float | None = Field(
         None, ge=0.0, le=2.0, description="DEPRECATED: Sampling temperature"
     )
-    max_tokens: Optional[int] = Field(
+    max_tokens: int | None = Field(
         None, ge=1, description="DEPRECATED: Maximum tokens to generate"
     )
-    base_url: Optional[str] = Field(
+    base_url: str | None = Field(
         None, description="DEPRECATED: Base URL for local/Ollama deployments"
     )
-    api_key: Optional[str] = Field(
+    api_key: str | None = Field(
         None, description="DEPRECATED: API key (can use env var instead)"
     )
 
@@ -165,33 +165,33 @@ class Settings(BaseSettings):
     )
 
     # Server
-    host: Optional[str] = None
-    port: Optional[int] = None
-    log_level: Optional[str] = None
+    host: str | None = None
+    port: int | None = None
+    log_level: str | None = None
 
     # Mopidy
-    mopidy_rpc_url: Optional[str] = None
-    mopidy_timeout: Optional[int] = None
+    mopidy_rpc_url: str | None = None
+    mopidy_timeout: int | None = None
 
     # Icecast
-    icecast_stream_url: Optional[str] = None
+    icecast_stream_url: str | None = None
 
     # LLM
-    llm_provider: Optional[str] = None
-    llm_model: Optional[str] = None
-    llm_temperature: Optional[float] = None
-    llm_max_tokens: Optional[int] = None
-    ollama_base_url: Optional[str] = None
+    llm_provider: str | None = None
+    llm_model: str | None = None
+    llm_temperature: float | None = None
+    llm_max_tokens: int | None = None
+    ollama_base_url: str | None = None
 
     # API Keys
-    anthropic_api_key: Optional[str] = None
-    openai_api_key: Optional[str] = None
+    anthropic_api_key: str | None = None
+    openai_api_key: str | None = None
 
     # History
-    max_request_history: Optional[int] = None
+    max_request_history: int | None = None
 
 
-def load_config(config_path: Optional[Path] = None) -> Config:
+def load_config(config_path: Path | None = None) -> Config:
     """
     Load configuration from YAML file and environment variables.
 
@@ -218,7 +218,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     # Load base config from YAML
     config_dict: dict[str, Any] = {}
     if config_path and config_path.exists():
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             config_dict = yaml.safe_load(f) or {}
 
     # Load environment settings
@@ -265,7 +265,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
 
 
 # Global config instance (will be set at startup)
-_config: Optional[Config] = None
+_config: Config | None = None
 
 
 def get_config() -> Config:
@@ -282,7 +282,7 @@ def set_config(config: Config) -> None:
     _config = config
 
 
-def reload_config(config_path: Optional[Path] = None) -> Config:
+def reload_config(config_path: Path | None = None) -> Config:
     """Reload configuration from disk."""
     global _config
     _config = load_config(config_path)

@@ -1,6 +1,5 @@
 """High-level podcast resolution logic."""
 
-from typing import Optional
 
 import structlog
 
@@ -41,7 +40,7 @@ class PodcastResolver:
             # Index by name (case-insensitive)
             self._feed_map[feed.name.lower()] = feed
 
-    def find_feed(self, show_name: str) -> Optional[PodcastFeed]:
+    def find_feed(self, show_name: str) -> PodcastFeed | None:
         """
         Find podcast feed by show name.
 
@@ -205,7 +204,7 @@ class PodcastResolver:
         matches.sort(key=lambda x: x[1], reverse=True)
         return [candidate for candidate, _ in matches[:limit]]
 
-    async def get_latest_from_genre(self, genre: str) -> Optional[MediaCandidate]:
+    async def get_latest_from_genre(self, genre: str) -> MediaCandidate | None:
         """
         Get latest episode from any show in a genre.
 
@@ -220,8 +219,8 @@ class PodcastResolver:
             return None
 
         # Get latest episode from each feed, pick the most recent overall
-        latest_episode: Optional[MediaCandidate] = None
-        latest_published: Optional[str] = None
+        latest_episode: MediaCandidate | None = None
+        latest_published: str | None = None
 
         for feed in feeds:
             try:

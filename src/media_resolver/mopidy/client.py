@@ -1,7 +1,6 @@
 """Mopidy JSON-RPC client."""
 
-import asyncio
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 import structlog
@@ -26,7 +25,7 @@ class MopidyConnectionError(MopidyError):
 class MopidyRPCError(MopidyError):
     """RPC call returned an error."""
 
-    def __init__(self, code: int, message: str, data: Optional[Any] = None):
+    def __init__(self, code: int, message: str, data: Any | None = None):
         self.code = code
         self.message = message
         self.data = data
@@ -52,8 +51,8 @@ class MopidyClient:
         self.rpc_url = rpc_url
         self.timeout = timeout
         self._request_id = 0
-        self._client: Optional[httpx.AsyncClient] = None
-        self._capabilities: Optional[dict[str, Any]] = None
+        self._client: httpx.AsyncClient | None = None
+        self._capabilities: dict[str, Any] | None = None
         self.log = logger.bind(component="mopidy_client")
 
     async def __aenter__(self):
@@ -124,7 +123,7 @@ class MopidyClient:
     # High-level API methods
 
     async def search(
-        self, query: Optional[dict[str, list[str]]] = None, uris: Optional[list[str]] = None
+        self, query: dict[str, list[str]] | None = None, uris: list[str] | None = None
     ) -> list[dict[str, Any]]:
         """
         Search library for tracks, artists, albums, etc.
@@ -160,7 +159,7 @@ class MopidyClient:
         """Get list of available playlists."""
         return await self.call("core.playlists.as_list")
 
-    async def get_playlist(self, uri: str) -> Optional[dict[str, Any]]:
+    async def get_playlist(self, uri: str) -> dict[str, Any] | None:
         """
         Get playlist details including tracks.
 
@@ -176,7 +175,7 @@ class MopidyClient:
         """Clear the current tracklist."""
         await self.call("core.tracklist.clear")
 
-    async def add_tracks(self, uris: list[str], at_position: Optional[int] = None) -> list[dict]:
+    async def add_tracks(self, uris: list[str], at_position: int | None = None) -> list[dict]:
         """
         Add tracks to tracklist.
 
@@ -196,7 +195,7 @@ class MopidyClient:
         """Shuffle the current tracklist."""
         await self.call("core.tracklist.shuffle")
 
-    async def play(self, tl_track: Optional[dict] = None) -> None:
+    async def play(self, tl_track: dict | None = None) -> None:
         """
         Start playback.
 
@@ -216,7 +215,7 @@ class MopidyClient:
         """Stop playback."""
         await self.call("core.playback.stop")
 
-    async def get_current_track(self) -> Optional[dict[str, Any]]:
+    async def get_current_track(self) -> dict[str, Any] | None:
         """
         Get currently playing track.
 
@@ -289,7 +288,7 @@ class MopidyClient:
             score=1.0,
         )
 
-    async def get_now_playing(self) -> Optional[NowPlaying]:
+    async def get_now_playing(self) -> NowPlaying | None:
         """
         Get current playback information as NowPlaying model.
 

@@ -1,12 +1,11 @@
 """Playback control MCP tools."""
 
 import time
-from typing import Optional
 
 import structlog
 
 from media_resolver.config import get_config
-from media_resolver.models import NowPlaying, StreamInfo
+from media_resolver.models import StreamInfo
 from media_resolver.mopidy.client import MopidyClient, MopidyError
 from media_resolver.request_logger import RequestStatus, get_request_logger
 

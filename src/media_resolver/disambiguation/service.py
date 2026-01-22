@@ -2,13 +2,11 @@
 
 import json
 import time
-from typing import Any, Optional
+from typing import Any
 
 import structlog
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 
 from media_resolver.config import get_config
 from media_resolver.disambiguation.llm_provider import create_llm, get_model_info
@@ -25,7 +23,7 @@ class DisambiguationService:
     and select the best media candidates based on user intent.
     """
 
-    def __init__(self, llm: Optional[BaseChatModel] = None):
+    def __init__(self, llm: BaseChatModel | None = None):
         """
         Initialize disambiguation service.
 
@@ -53,9 +51,9 @@ class DisambiguationService:
         self,
         query: str,
         candidates: list[MediaCandidate],
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
         top_k: int = 1,
-    ) -> tuple[list[MediaCandidate], Optional[LLMInteraction]]:
+    ) -> tuple[list[MediaCandidate], LLMInteraction | None]:
         """
         Disambiguate and rank candidates using LLM.
 
@@ -134,7 +132,7 @@ class DisambiguationService:
             # Fall back to original order
             return candidates[:top_k], None
 
-    def _build_system_prompt(self, context: Optional[dict[str, Any]] = None) -> str:
+    def _build_system_prompt(self, context: dict[str, Any] | None = None) -> str:
         """Build system prompt for disambiguation."""
         base_prompt = """You are an expert music and podcast recommendation assistant. Your job is to analyze user queries and candidate media items, then rank the candidates by relevance to the user's intent.
 
@@ -248,7 +246,7 @@ Include up to {min(top_k * 2, len(candidates))} ranked indices."""
 
     async def should_clarify(
         self, query: str, candidates: list[MediaCandidate], threshold: int = 3
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str | None]:
         """
         Determine if clarification is needed.
 

@@ -1,11 +1,11 @@
 """Unit tests for playback tools."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+from media_resolver.models import MediaKind, NowPlaying
 from media_resolver.tools.playback import get_stream_url, now_playing
-from media_resolver.models import NowPlaying, MediaKind
-from media_resolver.config import Config, IcecastConfig, MopidyConfig
 
 
 @pytest.mark.asyncio

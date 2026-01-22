@@ -1,6 +1,5 @@
 """Unit tests for configuration management."""
 
-import os
 import tempfile
 from pathlib import Path
 
@@ -9,18 +8,18 @@ import yaml
 
 from media_resolver.config import (
     Config,
+    GenreMapping,
+    IcecastConfig,
     LLMBackend,
     LLMConfig,
     MopidyConfig,
-    IcecastConfig,
-    ServerConfig,
     PodcastFeed,
-    GenreMapping,
+    ServerConfig,
     Settings,
-    load_config,
     get_config,
-    set_config,
+    load_config,
     reload_config,
+    set_config,
 )
 
 

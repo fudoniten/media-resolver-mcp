@@ -1,15 +1,15 @@
 """Unit tests for Mopidy client."""
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
+from media_resolver.models import MediaKind
 from media_resolver.mopidy.client import (
     MopidyClient,
-    MopidyError,
     MopidyConnectionError,
     MopidyRPCError,
 )
-from media_resolver.models import MediaKind, MediaCandidate
 
 
 class TestMopidyClientInit:
