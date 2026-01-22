@@ -18,32 +18,6 @@
         "type": "github"
       }
     },
-    "langchain-anthropic-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1580601600,
-        "narHash": "sha256-ehoA8RHB8+0imqbHAbEmVFPUJTvoAoekIW/R8TB1rR0=",
-        "type": "tarball",
-        "url": "https://files.pythonhosted.org/packages/0d/b6/ac5ee84e15bf79844c9c791f99a614c7ec7e1a63c2947e55977be01a81b4/langchain_anthropic-1.3.1.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://files.pythonhosted.org/packages/0d/b6/ac5ee84e15bf79844c9c791f99a614c7ec7e1a63c2947e55977be01a81b4/langchain_anthropic-1.3.1.tar.gz"
-      }
-    },
-    "langchain-openai-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1580601600,
-        "narHash": "sha256-C0oKbO4qzVZLamZDKu1p7UpyxLVt/ynaxpVjhFF9CeQ=",
-        "type": "tarball",
-        "url": "https://files.pythonhosted.org/packages/38/b7/30bfc4d1b658a9ee524bcce3b0b2ec9c45a11c853a13c4f0c9da9882784b/langchain_openai-1.1.7.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://files.pythonhosted.org/packages/38/b7/30bfc4d1b658a9ee524bcce3b0b2ec9c45a11c853a13c4f0c9da9882784b/langchain_openai-1.1.7.tar.gz"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1768886240,
@@ -63,8 +37,6 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "langchain-anthropic-src": "langchain-anthropic-src",
-        "langchain-openai-src": "langchain-openai-src",
         "nixpkgs": "nixpkgs"
       }
     },

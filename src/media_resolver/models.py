@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class MediaKind(str, Enum):
@@ -28,19 +28,8 @@ class PlaybackMode(str, Enum):
 class MediaCandidate(BaseModel):
     """A candidate media item from search/resolution."""
 
-    id: str = Field(..., description="Stable identifier (Mopidy URI or URL)")
-    kind: MediaKind = Field(..., description="Type of media")
-    title: str = Field(..., description="Display title")
-    subtitle: str | None = Field(None, description="Artist name, show name, or additional info")
-    published: str | None = Field(None, description="Publication date (ISO 8601) for podcasts")
-    duration_sec: int | None = Field(None, description="Duration in seconds")
-    audio_url: str | None = Field(None, description="Direct playable URL if available")
-    mopidy_uri: str | None = Field(None, description="Mopidy URI if applicable")
-    score: float = Field(default=0.0, ge=0.0, le=1.0, description="Relevance score (0-1)")
-    snippet: str | None = Field(None, description="Short description for disambiguation")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",
                 "kind": "track",
@@ -52,6 +41,18 @@ class MediaCandidate(BaseModel):
                 "snippet": "From Abbey Road (1969)",
             }
         }
+    )
+
+    id: str = Field(..., description="Stable identifier (Mopidy URI or URL)")
+    kind: MediaKind = Field(..., description="Type of media")
+    title: str = Field(..., description="Display title")
+    subtitle: str | None = Field(None, description="Artist name, show name, or additional info")
+    published: str | None = Field(None, description="Publication date (ISO 8601) for podcasts")
+    duration_sec: int | None = Field(None, description="Duration in seconds")
+    audio_url: str | None = Field(None, description="Direct playable URL if available")
+    mopidy_uri: str | None = Field(None, description="Mopidy URI if applicable")
+    score: float = Field(default=0.0, ge=0.0, le=1.0, description="Relevance score (0-1)")
+    snippet: str | None = Field(None, description="Short description for disambiguation")
 
 
 class NowPlaying(BaseModel):
@@ -68,19 +69,8 @@ class NowPlaying(BaseModel):
 class PlayPlan(BaseModel):
     """Plan for what to play and how."""
 
-    playback_url: str = Field(..., description="URL for Home Assistant to play (usually Icecast)")
-    now_playing: NowPlaying = Field(..., description="Information about what's playing")
-    alternates: list[MediaCandidate] = Field(
-        default_factory=list, description="Alternative candidates if ambiguous"
-    )
-    requires_clarification: bool = Field(default=False, description="Whether user input is needed")
-    clarification_question: str | None = Field(
-        None, description="Question to ask user for disambiguation"
-    )
-    total_tracks: int | None = Field(None, description="Total number of tracks queued")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "playback_url": "http://icecast:8000/mopidy",
                 "now_playing": {
@@ -93,6 +83,18 @@ class PlayPlan(BaseModel):
                 "total_tracks": 20,
             }
         }
+    )
+
+    playback_url: str = Field(..., description="URL for Home Assistant to play (usually Icecast)")
+    now_playing: NowPlaying = Field(..., description="Information about what's playing")
+    alternates: list[MediaCandidate] = Field(
+        default_factory=list, description="Alternative candidates if ambiguous"
+    )
+    requires_clarification: bool = Field(default=False, description="Whether user input is needed")
+    clarification_question: str | None = Field(
+        None, description="Question to ask user for disambiguation"
+    )
+    total_tracks: int | None = Field(None, description="Total number of tracks queued")
 
 
 class ErrorResponse(BaseModel):
@@ -139,6 +141,30 @@ class LLMInteraction(BaseModel):
 class RequestLog(BaseModel):
     """Log entry for a request to the MCP server."""
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "timestamp": "2026-01-21T12:00:00Z",
+                "request_id": "req_123456",
+                "tool_name": "play_music_by_artist",
+                "input_params": {"artist": "The Beatles", "mode": "replace", "shuffle": True},
+                "llm_interaction": {
+                    "provider": "anthropic",
+                    "model": "claude-3-5-sonnet-20241022",
+                    "prompt": "Rank these artists...",
+                    "reasoning": "The Beatles is the most relevant match...",
+                    "tokens": {"prompt": 150, "completion": 50},
+                    "latency_ms": 1200,
+                },
+                "output": {"playback_url": "http://icecast:8000/mopidy"},
+                "status": "success",
+                "total_latency_ms": 2500,
+                "mopidy_search_results": 5,
+                "disambiguation_occurred": True,
+            }
+        }
+    )
+
     timestamp: datetime = Field(default_factory=datetime.now)
     request_id: str = Field(..., description="Unique request identifier")
     tool_name: str = Field(..., description="MCP tool name")
@@ -162,26 +188,3 @@ class RequestLog(BaseModel):
     disambiguation_occurred: bool = Field(
         default=False, description="Whether LLM disambiguation was used"
     )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "timestamp": "2026-01-21T12:00:00Z",
-                "request_id": "req_123456",
-                "tool_name": "play_music_by_artist",
-                "input_params": {"artist": "The Beatles", "mode": "replace", "shuffle": True},
-                "llm_interaction": {
-                    "provider": "anthropic",
-                    "model": "claude-3-5-sonnet-20241022",
-                    "prompt": "Rank these artists...",
-                    "reasoning": "The Beatles is the most relevant match...",
-                    "tokens": {"prompt": 150, "completion": 50},
-                    "latency_ms": 1200,
-                },
-                "output": {"playback_url": "http://icecast:8000/mopidy"},
-                "status": "success",
-                "total_latency_ms": 2500,
-                "mopidy_search_results": 5,
-                "disambiguation_occurred": True,
-            }
-        }

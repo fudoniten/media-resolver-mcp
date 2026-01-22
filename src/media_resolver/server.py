@@ -258,7 +258,7 @@ def create_app() -> FastAPI:
     )
 
     # Mount MCP server
-    app.mount("/mcp", mcp.get_asgi_app())
+    app.mount("/mcp", mcp.http_app())
 
     # Mount admin UI
     admin_app = create_admin_app()
