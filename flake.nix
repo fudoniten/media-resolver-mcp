@@ -4,70 +4,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    
-    # LangChain provider packages not yet in nixpkgs
-    langchain-openai-src = {
-      url = "https://files.pythonhosted.org/packages/38/b7/30bfc4d1b658a9ee524bcce3b0b2ec9c45a11c853a13c4f0c9da9882784b/langchain_openai-1.1.7.tar.gz";
-      flake = false;
-    };
-    langchain-anthropic-src = {
-      url = "https://files.pythonhosted.org/packages/0d/b6/ac5ee84e15bf79844c9c791f99a614c7ec7e1a63c2947e55977be01a81b4/langchain_anthropic-1.3.1.tar.gz";
-      flake = false;
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, langchain-openai-src, langchain-anthropic-src }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         python = pkgs.python312;
         pythonPackages = python.pkgs;
-
-        # Custom package for langchain-openai using flake input
-        langchain-openai = pythonPackages.buildPythonPackage rec {
-          pname = "langchain-openai";
-          version = "1.1.7";
-          pyproject = true;
-
-          src = langchain-openai-src;
-
-          build-system = with pythonPackages; [
-            poetry-core
-          ];
-
-          dependencies = with pythonPackages; [
-            langchain-core
-            openai
-            tiktoken
-          ];
-
-          pythonImportsCheck = [ "langchain_openai" ];
-
-          doCheck = false; # Skip tests to avoid additional dependencies
-        };
-
-        # Custom package for langchain-anthropic using flake input
-        langchain-anthropic = pythonPackages.buildPythonPackage rec {
-          pname = "langchain-anthropic";
-          version = "1.3.1";
-          pyproject = true;
-
-          src = langchain-anthropic-src;
-
-          build-system = with pythonPackages; [
-            poetry-core
-          ];
-
-          dependencies = with pythonPackages; [
-            anthropic
-            langchain-core
-            pydantic
-          ];
-
-          pythonImportsCheck = [ "langchain_anthropic" ];
-
-          doCheck = false; # Skip tests to avoid additional dependencies
-        };
 
         media-resolver-mcp = pythonPackages.buildPythonApplication {
           pname = "media-resolver-mcp";
@@ -81,38 +25,38 @@
             wheel
           ];
 
-          propagatedBuildInputs = [
+          propagatedBuildInputs = with pythonPackages; [
             # MCP Server Framework
-            pythonPackages.fastmcp
+            fastmcp
 
             # Web Framework for Admin UI
-            pythonPackages.fastapi
-            pythonPackages.uvicorn
-            pythonPackages.jinja2
+            fastapi
+            uvicorn
+            jinja2
 
             # LangChain for LLM integration
-            pythonPackages.langchain
-            pythonPackages.langchain-core
-            pythonPackages.langchain-community
-            langchain-anthropic  # Custom package
-            langchain-openai     # Custom package
+            langchain
+            langchain-core
+            langchain-community
+            langchain-anthropic  # From nixpkgs
+            langchain-openai     # From nixpkgs
 
             # HTTP clients
-            pythonPackages.httpx
-            pythonPackages.aiohttp
+            httpx
+            aiohttp
 
             # Configuration and data handling
-            pythonPackages.pydantic
-            pythonPackages.pydantic-settings
-            pythonPackages.pyyaml
+            pydantic
+            pydantic-settings
+            pyyaml
 
             # RSS parsing for podcasts
-            pythonPackages.feedparser
-            pythonPackages.python-dateutil
+            feedparser
+            python-dateutil
 
             # Utilities
-            pythonPackages.python-dotenv
-            pythonPackages.structlog
+            python-dotenv
+            structlog
           ];
 
           # Optional dependencies for development
