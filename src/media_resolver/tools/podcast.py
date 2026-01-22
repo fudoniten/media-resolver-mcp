@@ -1,13 +1,12 @@
 """Podcast-related MCP tools."""
 
 import time
-from typing import Optional
 
 import structlog
 
 from media_resolver.config import get_config
 from media_resolver.disambiguation.service import DisambiguationService
-from media_resolver.models import MediaCandidate, MediaKind, NowPlaying, PlaybackMode, PlayPlan
+from media_resolver.models import MediaKind, NowPlaying, PlaybackMode, PlayPlan
 from media_resolver.mopidy.client import MopidyClient, MopidyError
 from media_resolver.podcast.resolver import PodcastResolver, PodcastResolverError
 from media_resolver.request_logger import RequestStatus, get_request_logger
@@ -365,7 +364,9 @@ async def play_podcast_episode(id: str, mode: str = "replace") -> dict:
             now_playing = await mopidy.get_now_playing()
             if not now_playing:
                 now_playing = NowPlaying(
-                    title="Podcast Episode", artist_or_show="Unknown", kind=MediaKind.PODCAST_EPISODE
+                    title="Podcast Episode",
+                    artist_or_show="Unknown",
+                    kind=MediaKind.PODCAST_EPISODE,
                 )
 
             plan = PlayPlan(

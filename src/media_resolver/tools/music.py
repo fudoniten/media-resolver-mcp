@@ -1,7 +1,6 @@
 """Music-related MCP tools."""
 
 import time
-from typing import Optional
 
 import structlog
 
@@ -164,7 +163,9 @@ async def play_music_by_artist(
                 mopidy_search_results=len(artist_candidates),
             )
 
-            log.info("artist_playback_started", artist=selected_artist.title, tracks=len(track_uris))
+            log.info(
+                "artist_playback_started", artist=selected_artist.title, tracks=len(track_uris)
+            )
             return plan.model_dump()
 
     except MopidyError as e:
@@ -459,7 +460,11 @@ async def play_song_search(query: str, mode: str = "replace", limit: int = 10) -
                     llm_interaction=llm_interaction,
                     mopidy_search_results=len(track_candidates),
                 )
-                return {"error_code": "no_playable_tracks", "message": error_msg, "retryable": False}
+                return {
+                    "error_code": "no_playable_tracks",
+                    "message": error_msg,
+                    "retryable": False,
+                }
 
             log.info("queuing_tracks", count=len(track_uris))
 
@@ -629,9 +634,7 @@ async def play_music_by_genre(
                     break
 
             if not genre_mapping or not genre_mapping.playlists:
-                error_msg = (
-                    f"Genre '{genre}' not supported. Configure genre mappings or use a different provider."
-                )
+                error_msg = f"Genre '{genre}' not supported. Configure genre mappings or use a different provider."
                 latency_ms = int((time.time() - start_time) * 1000)
                 request_logger.log_request(
                     tool_name="play_music_by_genre",
@@ -641,7 +644,11 @@ async def play_music_by_genre(
                     total_latency_ms=latency_ms,
                     error_message=error_msg,
                 )
-                return {"error_code": "genre_not_configured", "message": error_msg, "retryable": False}
+                return {
+                    "error_code": "genre_not_configured",
+                    "message": error_msg,
+                    "retryable": False,
+                }
 
             # Use the first mapped playlist
             playlist_name = genre_mapping.playlists[0]

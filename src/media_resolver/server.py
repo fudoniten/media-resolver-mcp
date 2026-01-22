@@ -1,8 +1,6 @@
 """FastMCP server entry point for Media Resolver."""
 
-import asyncio
 import logging
-import sys
 from contextlib import asynccontextmanager
 
 import structlog

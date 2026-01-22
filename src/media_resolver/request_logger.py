@@ -3,7 +3,7 @@
 import uuid
 from collections import deque
 from datetime import datetime
-from typing import Any, Deque, Optional
+from typing import Any
 
 import structlog
 
@@ -20,7 +20,7 @@ class RequestLogger:
     Tracks all MCP tool invocations with their inputs, outputs, and LLM interactions.
     """
 
-    def __init__(self, max_size: Optional[int] = None):
+    def __init__(self, max_size: int | None = None):
         """
         Initialize request logger.
 
@@ -31,7 +31,7 @@ class RequestLogger:
             config = get_config()
             max_size = config.max_request_history
 
-        self._logs: Deque[RequestLog] = deque(maxlen=max_size)
+        self._logs: deque[RequestLog] = deque(maxlen=max_size)
         self.log = logger.bind(component="request_logger")
         self.log.info("request_logger_initialized", max_size=max_size)
 
@@ -42,9 +42,9 @@ class RequestLogger:
         output: dict[str, Any],
         status: RequestStatus,
         total_latency_ms: int,
-        llm_interaction: Optional[LLMInteraction] = None,
-        error_message: Optional[str] = None,
-        mopidy_search_results: Optional[int] = None,
+        llm_interaction: LLMInteraction | None = None,
+        error_message: str | None = None,
+        mopidy_search_results: int | None = None,
     ) -> str:
         """
         Log a request.
@@ -91,7 +91,10 @@ class RequestLogger:
         return request_id
 
     def get_recent_requests(
-        self, limit: Optional[int] = None, tool_name: Optional[str] = None, status: Optional[RequestStatus] = None
+        self,
+        limit: int | None = None,
+        tool_name: str | None = None,
+        status: RequestStatus | None = None,
     ) -> list[RequestLog]:
         """
         Get recent requests with optional filtering.
@@ -123,7 +126,7 @@ class RequestLogger:
 
         return filtered
 
-    def get_request(self, request_id: str) -> Optional[RequestLog]:
+    def get_request(self, request_id: str) -> RequestLog | None:
         """
         Get a specific request by ID.
 
@@ -188,7 +191,7 @@ class RequestLogger:
 
 
 # Global logger instance
-_request_logger: Optional[RequestLogger] = None
+_request_logger: RequestLogger | None = None
 
 
 def get_request_logger() -> RequestLogger:
