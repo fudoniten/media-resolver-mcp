@@ -4,25 +4,32 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    
+    # LangChain provider packages not yet in nixpkgs
+    langchain-openai-src = {
+      url = "https://files.pythonhosted.org/packages/38/b7/30bfc4d1b658a9ee524bcce3b0b2ec9c45a11c853a13c4f0c9da9882784b/langchain_openai-1.1.7.tar.gz";
+      flake = false;
+    };
+    langchain-anthropic-src = {
+      url = "https://files.pythonhosted.org/packages/0d/b6/ac5ee84e15bf79844c9c791f99a614c7ec7e1a63c2947e55977be01a81b4/langchain_anthropic-1.3.1.tar.gz";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, langchain-openai-src, langchain-anthropic-src }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         python = pkgs.python312;
         pythonPackages = python.pkgs;
 
-        # Custom package for langchain-openai
+        # Custom package for langchain-openai using flake input
         langchain-openai = pythonPackages.buildPythonPackage rec {
           pname = "langchain-openai";
           version = "1.1.7";
           pyproject = true;
 
-          src = pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-NelZxoaaxqp6oKByRyR6dCKyL39+aJuD9RoC/DyCjgs=";
-          };
+          src = langchain-openai-src;
 
           build-system = with pythonPackages; [
             poetry-core
@@ -39,16 +46,13 @@
           doCheck = false; # Skip tests to avoid additional dependencies
         };
 
-        # Custom package for langchain-anthropic
+        # Custom package for langchain-anthropic using flake input
         langchain-anthropic = pythonPackages.buildPythonPackage rec {
           pname = "langchain-anthropic";
           version = "1.3.1";
           pyproject = true;
 
-          src = pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-H8Kc+ANwN1l+7hcpLMf0TYN86vEuEZV2jMmWJ7ODcEc=";
-          };
+          src = langchain-anthropic-src;
 
           build-system = with pythonPackages; [
             poetry-core
