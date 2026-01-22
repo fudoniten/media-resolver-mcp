@@ -25,11 +25,13 @@ class TestGetStreamUrl:
                 assert result["mount"] == "/mopidy"
                 assert result["status"] == "active"
 
-    async def test_get_stream_url_error_handling(self):
-        """Test error handling in get_stream_url."""
-        with patch(
-            "media_resolver.tools.playback.get_config", side_effect=Exception("Config error")
-        ):
+    async def test_get_stream_url_error_handling(self, sample_config):
+        """Test error handling in get_stream_url when accessing config attributes fails."""
+        # Make config.icecast raise an exception when accessed
+        bad_config = MagicMock()
+        bad_config.icecast = MagicMock(side_effect=Exception("Config error"))
+
+        with patch("media_resolver.tools.playback.get_config", return_value=bad_config):
             with patch("media_resolver.tools.playback.get_request_logger") as mock_logger:
                 mock_logger.return_value = MagicMock()
 

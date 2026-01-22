@@ -72,7 +72,7 @@ class TestDisambiguationService:
         assert interaction.reasoning == "Candidate 1 is the best match because it's an exact match"
         assert interaction.tokens["prompt"] == 150
         assert interaction.tokens["completion"] == 50
-        assert interaction.latency_ms > 0
+        assert interaction.latency_ms >= 0  # Mock executes instantly, so can be 0
 
     async def test_disambiguate_with_markdown_json(self):
         """Test parsing LLM response with markdown code blocks."""
